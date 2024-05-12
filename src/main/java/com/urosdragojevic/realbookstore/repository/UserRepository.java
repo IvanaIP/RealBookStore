@@ -1,5 +1,6 @@
 package com.urosdragojevic.realbookstore.repository;
 
+import com.urosdragojevic.realbookstore.audit.AuditLogger;
 import com.urosdragojevic.realbookstore.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +35,10 @@ public class UserRepository {
                 return new User(id, username1, password);
             }
         } catch (SQLException e) {
+            LOG.warn("Neuspesna pretraga korisnika sa imenom: " + username);
             e.printStackTrace();
         }
+        AuditLogger.getAuditLogger(UserRepository.class).audit("Pretraga korisnika pod imenom " + username);
         return null;
     }
 
@@ -46,6 +49,7 @@ public class UserRepository {
              ResultSet rs = statement.executeQuery(query)) {
             return rs.next();
         } catch (SQLException e) {
+            LOG.error("Neuspesna validacija za korisnika sa imenom: " + username);
             e.printStackTrace();
         }
         return false;
@@ -58,7 +62,9 @@ public class UserRepository {
         ) {
             statement.executeUpdate(query);
         } catch (SQLException e) {
+            LOG.warn("Neuspesno otklanjanje korisnika sa id-jem: " + userId);
             e.printStackTrace();
         }
+        AuditLogger.getAuditLogger(UserRepository.class).audit("Otklanjanje korisnika sa id-jem: " + userId);
     }
 }
